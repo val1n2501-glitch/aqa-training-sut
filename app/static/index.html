@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task Manager — QA Training</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <main>
+    <header><h1>Task Manager</h1><p>Учебный стенд для Python AQA</p></header>
+    <div id="error" role="alert" data-testid="api-error" hidden></div>
+    <div id="success" role="status" data-testid="success-message" hidden></div>
+    <section aria-labelledby="create-heading">
+      <h2 id="create-heading">Новая задача</h2>
+      <form id="create-form" data-testid="create-task-form">
+        <label>Название <input name="title" required maxlength="120" data-testid="task-title-input"></label>
+        <label>Описание <textarea name="description" maxlength="2000" data-testid="task-desc-input"></textarea></label>
+        <div class="fields">
+          <label>Статус <select name="status" data-testid="task-status-input"><option value="todo">К выполнению</option><option value="in_progress">В работе</option><option value="done">Выполнено</option></select></label>
+          <label>Приоритет <select name="priority" data-testid="task-priority-input"><option value="low">Низкий</option><option value="medium" selected>Средний</option><option value="high">Высокий</option></select></label>
+          <label>Срок <input type="date" name="due_date" data-testid="task-due-date-input"></label>
+        </div>
+        <button type="submit" data-testid="add-task-btn">Добавить</button>
+      </form>
+    </section>
+    <section aria-labelledby="list-heading">
+      <h2 id="list-heading">Задачи</h2>
+      <form id="filters" class="fields" data-testid="filters-form">
+        <label>Поиск <input name="q" type="search" maxlength="200" data-testid="task-search" placeholder="Название или описание"></label>
+        <label>Статус <select name="status" data-testid="status-filter"><option value="">Все</option><option value="todo">К выполнению</option><option value="in_progress">В работе</option><option value="done">Выполнено</option></select></label>
+        <label>Приоритет <select name="priority" data-testid="priority-filter"><option value="">Все</option><option value="low">Низкий</option><option value="medium">Средний</option><option value="high">Высокий</option></select></label>
+        <label>Сортировка <select name="sort_by" data-testid="sort-by"><option value="id">По ID</option><option value="title">По названию</option><option value="status">По статусу</option><option value="priority">По приоритету</option><option value="due_date">По сроку</option><option value="created_at">По созданию</option><option value="updated_at">По обновлению</option></select></label>
+        <label>Порядок <select name="order" data-testid="sort-order"><option value="asc">По возрастанию</option><option value="desc">По убыванию</option></select></label>
+        <button type="submit" data-testid="apply-filters">Применить</button>
+      </form>
+      <p id="loading" role="status" data-testid="loading" hidden>Загрузка…</p>
+      <p id="empty" data-testid="empty-state" hidden>Задач не найдено.</p>
+      <div id="task-list" data-testid="task-list" aria-live="polite"></div>
+      <nav aria-label="Страницы задач" class="pagination">
+        <button id="previous" data-testid="previous-page" disabled>Назад</button>
+        <span id="page-info" data-testid="page-info"></span>
+        <button id="next" data-testid="next-page" disabled>Далее</button>
+      </nav>
+    </section>
+    <footer><a href="/docs">Swagger — документация API</a></footer>
+  </main>
+  <dialog id="edit-dialog" aria-labelledby="edit-heading" data-testid="edit-dialog">
+    <h2 id="edit-heading">Редактирование задачи</h2>
+    <form id="edit-form" data-testid="edit-task-form">
+      <label>Название <input name="title" required maxlength="120" data-testid="edit-title-input"></label>
+      <label>Описание <textarea name="description" maxlength="2000" data-testid="edit-desc-input"></textarea></label>
+      <label>Статус <select name="status" data-testid="edit-status-input"><option value="todo">К выполнению</option><option value="in_progress">В работе</option><option value="done">Выполнено</option></select></label>
+      <label>Приоритет <select name="priority" data-testid="edit-priority-input"><option value="low">Низкий</option><option value="medium">Средний</option><option value="high">Высокий</option></select></label>
+      <label>Срок <input type="date" name="due_date" data-testid="edit-due-date-input"></label>
+      <div class="actions"><button type="submit" data-testid="save-task-btn">Сохранить</button><button type="button" id="cancel-edit" class="secondary" data-testid="cancel-edit">Отмена</button></div>
+      <p id="edit-error" role="alert" data-testid="edit-error" hidden></p>
+    </form>
+  </dialog>
+  <dialog id="delete-dialog" aria-labelledby="delete-heading" data-testid="delete-dialog">
+    <h2 id="delete-heading">Удалить задачу?</h2>
+    <p id="delete-title"></p>
+    <div class="actions"><button id="confirm-delete" class="danger" data-testid="confirm-delete">Удалить</button><button id="cancel-delete" class="secondary" data-testid="cancel-delete">Отмена</button></div>
+    <p id="delete-error" role="alert" data-testid="delete-error" hidden></p>
+  </dialog>
+</body>
+</html>
