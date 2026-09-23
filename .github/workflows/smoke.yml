@@ -1,0 +1,51 @@
+name: Public SUT smoke
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - uses: astral-sh/setup-uv@v10.1.0
+        with:
+          version: '0.10.6'
+          enable-cache: true
+      - run: uv sync --locked
+      - name: Ruff
+        run: |
+          uv run --locked ruff check .
+          uv run --locked ruff format --check .
+      - name: API smoke (normal mode, including reset protection)
+        run: uv run --locked pytest -m api -q
+      - run: uv run --locked playwright install --with-deps chromium
+      - name: UI smoke
+        env:
+          APP_HOST: 127.0.0.1
+          APP_PORT: '8000'
+          DATABASE_URL: sqlite:///./data/ci-smoke.db
+          TEST_MODE: 'false'
+          BASE_URL: http://127.0.0.1:8000
+        run: |
+          uv run --locked python -m app > "$RUNNER_TEMP/sut.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=false
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent "$BASE_URL/api/health"; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then
+            cat "$RUNNER_TEMP/sut.log"
+            exit 1
+          fi
+          uv run --locked pytest -m ui -q
